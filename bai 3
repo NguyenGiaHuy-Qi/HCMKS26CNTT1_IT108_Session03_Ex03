@@ -1,0 +1,320 @@
+# BTVN09 – THIẾT KẾ CÂY THƯ MỤC DỰ ÁN CINEBOOK BACKEND
+
+## 1. Mục tiêu
+
+Thiết kế cây thư mục dự án Backend chuyên nghiệp, dễ quản lý mã nguồn, tách biệt dữ liệu người dùng và bảo vệ thông tin cấu hình nhạy cảm như mật khẩu Database.
+
+---
+
+## 2. Phần 1 – Phân tích và thiết kế File System Tree
+
+Cấu trúc thư mục đề xuất:
+
+```text
+CineBook-Backend/
+|
+|-- .env
+|-- .gitignore
+|-- package.json
+|-- README.md
+|
+|-- src/
+|   |-- config/
+|   |   |-- database.js
+|   |   `-- app.js
+|   |
+|   |-- controllers/
+|   |   |-- auth.controller.js
+|   |   |-- movie.controller.js
+|   |   `-- booking.controller.js
+|   |
+|   |-- routes/
+|   |   |-- auth.routes.js
+|   |   |-- movie.routes.js
+|   |   `-- booking.routes.js
+|   |
+|   |-- models/
+|   |   |-- user.model.js
+|   |   |-- movie.model.js
+|   |   `-- booking.model.js
+|   |
+|   |-- services/
+|   |   |-- auth.service.js
+|   |   |-- movie.service.js
+|   |   `-- booking.service.js
+|   |
+|   `-- middlewares/
+|       |-- auth.middleware.js
+|       `-- error.middleware.js
+|
+|-- uploads/
+|   |-- movies/
+|   |-- avatars/
+|   `-- temporary/
+|
+`-- docs/
+    |-- api-documentation.md
+    `-- database-design.md
+```
+
+### Giải thích cấu trúc
+
+Cấu trúc được chia thành các nhóm chính:
+
+```text
+CineBook-Backend
+├── .env
+├── src/
+├── uploads/
+└── docs/
+```
+
+Trong đó:
+
+- `src/` → chứa mã nguồn chính của Backend.
+- `uploads/` → chứa các hình ảnh/tệp do người dùng tải lên.
+- `docs/` → chứa tài liệu của dự án.
+- `.env` → chứa các biến môi trường và thông tin cấu hình nhạy cảm.
+
+Việc tách `uploads/` khỏi `src/` giúp dữ liệu người dùng không bị trộn lẫn với mã nguồn.
+
+---
+
+## 3. Phần 2 – Thiết kế giải pháp bảo vệ file `.env`
+
+### 3.1. Đặt tên file
+
+File chứa thông tin cấu hình Database được đặt tên:
+
+```text
+.env
+```
+
+Ví dụ nội dung:
+
+```env
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_database_password
+DB_NAME=cinebook
+```
+
+File `.env` bắt đầu bằng dấu `.` nên thuộc nhóm **dotfile** trên Linux/macOS và thường được coi là file ẩn.
+
+---
+
+### 3.2. Cấu hình `.env` không bị đưa lên Git
+
+Ngoài việc ẩn file khỏi giao diện, cần bảo vệ `.env` khỏi việc bị commit lên Git.
+
+Tạo file:
+
+```text
+.gitignore
+```
+
+và thêm:
+
+```gitignore
+.env
+uploads/
+node_modules/
+```
+
+Điều này giúp Git bỏ qua `.env` khi thực hiện `git add`.
+
+> Lưu ý: `.gitignore` chỉ ngăn Git theo dõi file chưa được commit; nó không mã hóa `.env` và không bảo vệ file khỏi người có quyền truy cập vào máy.
+
+---
+
+### 3.3. Ẩn `.env` trên Linux/macOS
+
+Trên Linux/macOS, file bắt đầu bằng dấu `.` đã được xem là file ẩn trong giao diện thông thường.
+
+Ví dụ:
+
+```text
+.env
+```
+
+Có thể kiểm tra bằng Terminal:
+
+```bash
+ls -la
+```
+
+Tùy File Manager/Finder, có thể dùng phím tắt để hiển thị hoặc ẩn các file bắt đầu bằng `.`.
+
+---
+
+### 3.4. Ẩn `.env` trên Windows
+
+Nếu dự án chạy trên Windows, có thể đặt thuộc tính Hidden cho file `.env`.
+
+Trong File Explorer:
+
+```text
+Right Click .env
+→ Properties
+→ tích chọn Hidden
+→ Apply
+```
+
+Sau đó file sẽ không hiển thị trong giao diện File Explorer thông thường nếu tùy chọn hiển thị file ẩn đang tắt.
+
+Có thể kiểm tra bằng PowerShell:
+
+```powershell
+Get-Item .env -Force
+```
+
+---
+
+## 4. Phần 3 – Vai trò của các thư mục chính
+
+### `src/`
+
+Chứa toàn bộ **mã nguồn Backend** của CineBook.
+
+Ví dụ:
+
+```text
+src/
+├── controllers/
+├── routes/
+├── models/
+├── services/
+├── middlewares/
+└── config/
+```
+
+---
+
+### `src/controllers/`
+
+Xử lý request từ client và trả response.
+
+Ví dụ:
+
+```text
+movie.controller.js
+booking.controller.js
+```
+
+---
+
+### `src/routes/`
+
+Định nghĩa các API endpoint của hệ thống.
+
+Ví dụ:
+
+```text
+GET    /api/movies
+POST   /api/bookings
+POST   /api/auth/login
+```
+
+---
+
+### `src/models/`
+
+Định nghĩa cấu trúc dữ liệu và tương tác với Database.
+
+Ví dụ:
+
+```text
+user.model.js
+movie.model.js
+booking.model.js
+```
+
+---
+
+### `src/services/`
+
+Chứa các logic nghiệp vụ chính của hệ thống.
+
+Ví dụ:
+
+- Kiểm tra thông tin đăng nhập.
+- Xử lý đặt vé.
+- Kiểm tra ghế.
+- Tính tổng tiền.
+
+---
+
+### `src/middlewares/`
+
+Chứa các middleware dùng để xử lý request trước khi đến controller.
+
+Ví dụ:
+
+- Kiểm tra JWT.
+- Kiểm tra quyền truy cập.
+- Xử lý lỗi.
+- Validate dữ liệu.
+
+---
+
+### `uploads/`
+
+Chứa **file/hình ảnh do người dùng tải lên**.
+
+Ví dụ:
+
+```text
+uploads/
+├── movies/
+├── avatars/
+└── temporary/
+```
+
+Thư mục này được tách khỏi `src/` để tránh trộn dữ liệu người dùng với mã nguồn.
+
+---
+
+### `docs/`
+
+Chứa tài liệu của dự án.
+
+Ví dụ:
+
+```text
+docs/
+├── api-documentation.md
+└── database-design.md
+```
+
+---
+
+## 5. Nguyên tắc bảo mật
+
+Dự án cần tuân thủ các nguyên tắc:
+
+1. Không hard-code mật khẩu Database trực tiếp trong mã nguồn.
+2. Sử dụng `.env` để lưu biến môi trường nhạy cảm.
+3. Không commit `.env` lên GitHub công khai.
+4. Thêm `.env` vào `.gitignore`.
+5. Tách `uploads/` khỏi `src/`.
+6. Không đặt file upload của người dùng vào thư mục chứa mã nguồn.
+7. Không chia sẻ mật khẩu Database trong README hoặc source code.
+
+---
+
+## 6. Kết luận
+
+Cây thư mục CineBook Backend được thiết kế theo hướng **tách biệt mã nguồn, dữ liệu người dùng, cấu hình và tài liệu**:
+
+```text
+CineBook-Backend/
+├── .env          → Cấu hình nhạy cảm
+├── src/          → Mã nguồn Backend
+├── uploads/      → Hình ảnh/tệp người dùng
+└── docs/         → Tài liệu dự án
+```
+
+File `.env` được đặt tên bắt đầu bằng dấu `.` để trở thành **dotfile/hidden file** trên Linux/macOS, đồng thời có thể đặt thuộc tính **Hidden** trên Windows.
+
+Quan trọng nhất, việc ẩn `.env` chỉ giúp giảm nguy cơ vô tình nhìn thấy hoặc copy file. **Biện pháp bảo mật thực sự là không commit `.env` lên repository công khai và sử dụng `.gitignore` để loại file này khỏi Git.**
